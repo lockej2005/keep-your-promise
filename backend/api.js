@@ -2,7 +2,7 @@
 
 const express = require('express');
 const router = express.Router();
-const db = require('../src/database');
+const db = require('./database');
 
 // API endpoint to add a new promise
 router.post('/add-promise', (req, res) => {
@@ -42,5 +42,25 @@ router.get('/get-promises', (req, res) => {
     return res.status(200).json(promises);
   });
 });
+// api.js
+
+// ... (Your existing code)
+
+// API endpoint to add a new promise
+router.post('/add-promise', (req, res) => {
+  const { text } = req.body; // Expecting the promise text from the request body
+  const status = 'active'; // Newly added promises are considered active by default
+
+  db.addPromise(text, status, (err) => {
+    if (err) {
+      return res.status(500).json({ error: 'Error adding the promise.' });
+    }
+
+    return res.status(200).json({ message: 'Promise added successfully.' });
+  });
+});
+
+// ... (Your existing code)
+
 
 module.exports = router;

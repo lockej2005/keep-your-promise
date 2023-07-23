@@ -1,11 +1,13 @@
-// server.js
-
 const express = require('express');
+const cors = require('cors'); // Import the cors package
 const app = express();
 const apiRouter = require('./api');
 
 // Middleware to parse incoming request bodies as JSON
 app.use(express.json());
+
+// Enable CORS for all routes
+app.use(cors());
 
 // Use the API router
 app.use('/api', apiRouter);

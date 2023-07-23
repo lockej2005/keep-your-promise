@@ -1,20 +1,50 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 
 const App = () => {
   const [promises, setPromises] = useState([]);
   const [newPromise, setNewPromise] = useState('');
 
-  const handleAddPromise = () => {
+  useEffect(() => {
+    // Fetch promises from the API when the component mounts
+    fetchPromises();
+  }, []);
+
+  const fetchPromises = async () => {
+    try {
+      const response = await axios.get('http://localhost:5000/api/get-promises');
+      setPromises(response.data);
+      console.log(response.data);
+    } catch (error) {
+      console.error('Error fetching promises:', error.response.data.error);
+    }
+  };
+  
+  const handleAddPromise = async () => {
     if (newPromise.trim() !== '') {
-      setPromises([...promises, { text: newPromise, status: 'active' }]);
-      setNewPromise('');
+      try {
+        // Send a POST request to the API endpoint to add the new promise
+        await axios.post('http://localhost:5000/api/add-promise', { text: newPromise });
+        // If the request is successful, fetch updated promises from the API
+        fetchPromises();
+        setNewPromise('');
+      } catch (error) {
+        console.error('Error adding promise:', error.response.data.error);
+      }
     }
   };
 
-  const handlePromiseStatusChange = (index, status) => {
+  const handlePromiseStatusChange = async (index, status) => {
     const updatedPromises = [...promises];
     updatedPromises[index].status = status;
     setPromises(updatedPromises);
+
+    try {
+      // Send a PUT request to the API endpoint to update the promise status
+      await axios.put(`http://localhost:5000/api/update-promise/${promises[index].id}`, { status });
+    } catch (error) {
+      console.error('Error updating promise status:', error.response.data.error);
+    }
   };
 
   const calculatePromiseWeightScore = () => {
