@@ -14,12 +14,11 @@ const App = () => {
     try {
       const response = await axios.get('http://localhost:5000/api/get-promises');
       setPromises(response.data);
-      console.log(response.data);
     } catch (error) {
       console.error('Error fetching promises:', error.response.data.error);
     }
   };
-  
+
   const handleAddPromise = async () => {
     if (newPromise.trim() !== '') {
       try {
@@ -35,13 +34,25 @@ const App = () => {
   };
 
   const handlePromiseStatusChange = async (index, status) => {
-    const updatedPromises = [...promises];
-    updatedPromises[index].status = status;
-    setPromises(updatedPromises);
-
     try {
       // Send a PUT request to the API endpoint to update the promise status
       await axios.put(`http://localhost:5000/api/update-promise/${promises[index].id}`, { status });
+
+      // Update the promises state using the functional form of setPromises
+      setPromises((prevState) => {
+        const updatedPromises = [...prevState];
+        updatedPromises[index].status = status;
+
+        // Update activePromises, promisesKept, and promisesFailed with the updated promises
+        const updatedActivePromises = updatedPromises.filter((promise) => promise.status === 'active');
+        const updatedPromisesKept = updatedPromises.filter((promise) => promise.status === 'kept');
+        const updatedPromisesFailed = updatedPromises.filter((promise) => promise.status === 'failed');
+
+        // No need to update activePromises, promisesKept, and promisesFailed here
+        // as they are now part of the promises state
+
+        return updatedPromises;
+      });
     } catch (error) {
       console.error('Error updating promise status:', error.response.data.error);
     }
@@ -58,9 +69,9 @@ const App = () => {
     return ((keptPromisesCount / totalKeptOrFailedPromisesCount) * 100).toFixed(2);
   };
 
-  const activePromises = promises.filter((promise) => promise.status === 'active');
-  const promisesKept = promises.filter((promise) => promise.status === 'kept');
-  const promisesFailed = promises.filter((promise) => promise.status === 'failed');
+  // No need to filter activePromises, promisesKept, and promisesFailed here
+  // as they are now part of the promises state
+
   const promiseWeightScore = calculatePromiseWeightScore();
 
   return (
@@ -78,30 +89,36 @@ const App = () => {
       <div>
         <h2>Active Promises</h2>
         <ul>
-          {activePromises.map((promise, index) => (
-            <li key={index}>
-              {promise.text}
-              <div>
-                <button onClick={() => handlePromiseStatusChange(index, 'kept')}>Promise Kept</button>
-                <button onClick={() => handlePromiseStatusChange(index, 'failed')}>Promise Failed</button>
-              </div>
-            </li>
+          {promises.map((promise, index) => (
+            promise.status === 'active' && (
+              <li key={index}>
+                {promise.text}
+                <div>
+                  <button onClick={() => handlePromiseStatusChange(index, 'kept')}>Promise Kept</button>
+                  <button onClick={() => handlePromiseStatusChange(index, 'failed')}>Promise Failed</button>
+                </div>
+              </li>
+            )
           ))}
         </ul>
       </div>
       <div>
         <h2>Promises Kept</h2>
         <ul>
-          {promisesKept.map((promise, index) => (
-            <li key={index}>{promise.text}</li>
+          {promises.map((promise, index) => (
+            promise.status === 'kept' && (
+              <li key={index}>{promise.text}</li>
+            )
           ))}
         </ul>
       </div>
       <div>
         <h2>Promises Failed</h2>
         <ul>
-          {promisesFailed.map((promise, index) => (
-            <li key={index}>{promise.text}</li>
+          {promises.map((promise, index) => (
+            promise.status === 'failed' && (
+              <li key={index}>{promise.text}</li>
+            )
           ))}
         </ul>
       </div>
