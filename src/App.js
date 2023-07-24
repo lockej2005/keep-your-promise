@@ -43,11 +43,7 @@ const App = () => {
         const updatedPromises = [...prevState];
         updatedPromises[index].status = status;
 
-        // Update activePromises, promisesKept, and promisesFailed with the updated promises
-        const updatedActivePromises = updatedPromises.filter((promise) => promise.status === 'active');
-        const updatedPromisesKept = updatedPromises.filter((promise) => promise.status === 'kept');
-        const updatedPromisesFailed = updatedPromises.filter((promise) => promise.status === 'failed');
-
+        // Update activePromises, promisesKept, and promisesFailed with the updated promise
         // No need to update activePromises, promisesKept, and promisesFailed here
         // as they are now part of the promises state
 
