@@ -74,8 +74,8 @@ const App = () => {
               <li key={index}>
                 {promise.text}
                 <div>
-                  <button onClick={() => handlePromiseStatusChange(index, 'kept')}>Promise Kept</button>
-                  <button onClick={() => handlePromiseStatusChange(index, 'failed')}>Promise Failed</button>
+                  <button onClick={() => handlePromiseStatusChange(index, 'kept')}>promise Kept</button>
+                  <button onClick={() => handlePromiseStatusChange(index, 'failed')}>promise Failed</button>
                 </div>
               </li>
             )
