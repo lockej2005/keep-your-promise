@@ -1,7 +1,9 @@
-// jest.config.js
-module.exports = {
-    transform: {
-      '^.+\\.(js|jsx)$': 'babel-jest',
-    },
-  };
-  
+export default {
+  transform: {
+    '^.+\\.jsx?$': 'babel-jest',
+  },
+  moduleNameMapper: {
+    '^axios$': 'axios/index.js',
+  },
+  moduleDirectories: ['node_modules'],
+};
