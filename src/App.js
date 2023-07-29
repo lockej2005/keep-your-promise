@@ -6,7 +6,6 @@ const App = () => {
   const [newPromise, setNewPromise] = useState('');
 
   useEffect(() => {
-    // Fetch promises from the API when the component mounts
     fetchPromises();
   }, []);
 
@@ -22,9 +21,7 @@ const App = () => {
   const handleAddPromise = async () => {
     if (newPromise.trim() !== '') {
       try {
-        // Send a POST request to the API endpoint to add the new promise
         await axios.post('http://localhost:5000/api/add-promise', { text: newPromise });
-        // If the request is successful, fetch updated promises from the API
         fetchPromises();
         setNewPromise('');
       } catch (error) {
@@ -35,18 +32,10 @@ const App = () => {
 
   const handlePromiseStatusChange = async (index, status) => {
     try {
-      // Send a PUT request to the API endpoint to update the promise status
       await axios.put(`http://localhost:5000/api/update-promise/${promises[index].id}`, { status });
-
-      // Update the promises state using the functional form of setPromises
       setPromises((prevState) => {
         const updatedPromises = [...prevState];
         updatedPromises[index].status = status;
-
-        // Update activePromises, promisesKept, and promisesFailed with the updated promise
-        // No need to update activePromises, promisesKept, and promisesFailed here
-        // as they are now part of the promises state
-
         return updatedPromises;
       });
     } catch (error) {
@@ -57,16 +46,11 @@ const App = () => {
   const calculatePromiseWeightScore = () => {
     const keptPromisesCount = promises.filter((promise) => promise.status === 'kept').length;
     const totalKeptOrFailedPromisesCount = keptPromisesCount + promises.filter((promise) => promise.status === 'failed').length;
-
     if (totalKeptOrFailedPromisesCount === 0) {
       return 0;
     }
-
     return ((keptPromisesCount / totalKeptOrFailedPromisesCount) * 100).toFixed(2);
   };
-
-  // No need to filter activePromises, promisesKept, and promisesFailed here
-  // as they are now part of the promises state
 
   const promiseWeightScore = calculatePromiseWeightScore();
 
