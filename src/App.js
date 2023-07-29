@@ -64,7 +64,7 @@ const App = () => {
           onChange={(e) => setNewPromise(e.target.value)}
           placeholder="Enter your promise..."
         />
-        <button onClick={handleAddPromise}>Add Promise</button>
+        <button onClick={handleAddPromise}>Add promise</button>
       </div>
       <div>
         <h2>Active Promises</h2>
