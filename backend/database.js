@@ -1,78 +1,63 @@
-const sqlite3 = require('sqlite3').verbose();
+const sql = require('mssql');
 
-// Create and connect to the SQLite database
-const db = new sqlite3.Database('promises.db', (err) => {
-  if (err) {
-    console.error('Error opening database:', err.message);
-  } else {
-    console.log('Connected to the promises database.');
+// Configuration object for your Azure SQL Server
+const config = {
+  user: 'your_username_here',
+  password: 'your_password_here',
+  server: 'promisestatserver.database.windows.net', 
+  database: 'promisedb',
+  options: {
+    encrypt: true
   }
-});
-
-// Create the promises table if it doesn't exist
-const createTable = () => {
-  const createTableQuery = `
-    CREATE TABLE IF NOT EXISTS promises (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      text TEXT,
-      status TEXT
-    )`;
-
-  db.run(createTableQuery, (err) => {
-    if (err) {
-      console.error('Error creating table:', err.message);
-    } else {
-      console.log('Table "promises" created or already exists.');
-    }
-  });
 };
 
-// Initialize the database by creating the table
-createTable();
-
 // Function to add a new promise to the database
-const addPromise = (text, status, callback) => {
-  const insertPromiseQuery = 'INSERT INTO promises (text, status) VALUES (?, ?)';
+const addPromise = async (text, status, callback) => {
+  try {
+    const pool = await sql.connect(config);
+    const result = await pool.request()
+      .input('text', sql.NVarChar, text)
+      .input('status', sql.NVarChar, status)
+      .query('INSERT INTO promises (promise, status) VALUES (@text, @status)');
 
-  db.run(insertPromiseQuery, [text, status], (err) => {
-    if (err) {
-      console.error('Error adding promise:', err.message);
-      callback(err);
-    } else {
-      console.log('Promise added successfully.');
-      callback(null);
-    }
-  });
+    console.log('Promise added successfully.');
+    callback(null);
+  } catch (err) {
+    console.error('Error adding promise:', err.message);
+    callback(err);
+  }
 };
 
 // Function to update the status of a promise
-const updatePromiseStatus = (id, status, callback) => {
-  const updateStatusQuery = 'UPDATE promises SET status = ? WHERE id = ?';
+const updatePromiseStatus = async (id, status, callback) => {
+  try {
+    const pool = await sql.connect(config);
+    const result = await pool.request()
+      .input('status', sql.NVarChar, status)
+      .input('id', sql.Int, id)
+      .query('UPDATE promises SET status = @status WHERE id = @id');
 
-  db.run(updateStatusQuery, [status, id], (err) => {
-    if (err) {
-      console.error('Error updating promise status:', err.message);
-      callback(err);
-    } else {
-      console.log('Promise status updated successfully.');
-      callback(null);
-    }
-  });
+    console.log('Promise status updated successfully.');
+    callback(null);
+  } catch (err) {
+    console.error('Error updating promise status:', err.message);
+    callback(err);
+  }
 };
 
 // Function to retrieve all promises from the database
-const getAllPromises = (callback) => {
-  const selectAllPromisesQuery = 'SELECT * FROM promises';
+const getAllPromises = async (callback) => {
+  try {
+    const pool = await sql.connect(config);
+    const result = await pool.request()
+      .query('SELECT * FROM promises');
 
-  db.all(selectAllPromisesQuery, (err, rows) => {
-    if (err) {
-      console.error('Error retrieving promises:', err.message);
-      callback(err, null);
-    } else {
-      console.log('Promises retrieved successfully.');
-      callback(null, rows);
-    }
-  });
+    console.log('Promises retrieved successfully.');
+    callback(null, result.recordset);
+  } catch (err) {
+    console.error('Error retrieving promises:', err.message);
+    callback(err, null);
+  }
 };
 
 module.exports = {

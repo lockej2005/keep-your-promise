@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
+const BASE_URL = 'promisestatserver.database.windows.net';
+
 const App = () => {
   const [promises, setPromises] = useState([]);
   const [newPromise, setNewPromise] = useState('');
@@ -11,7 +13,7 @@ const App = () => {
 
   const fetchPromises = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/get-promises');
+      const response = await axios.get(`${BASE_URL}/api/get-promises`);
       setPromises(response.data);
     } catch (error) {
       console.error('Error fetching promises:', error.response.data.error);
@@ -21,7 +23,7 @@ const App = () => {
   const handleAddPromise = async () => {
     if (newPromise.trim() !== '') {
       try {
-        await axios.post('http://localhost:5000/api/add-promise', { text: newPromise });
+        await axios.post(`${BASE_URL}/api/add-promise`, { text: newPromise });
         fetchPromises();
         setNewPromise('');
       } catch (error) {
@@ -32,7 +34,7 @@ const App = () => {
 
   const handlePromiseStatusChange = async (index, status) => {
     try {
-      await axios.put(`http://localhost:5000/api/update-promise/${promises[index].id}`, { status });
+      await axios.put(`${BASE_URL}/api/update-promise/${promises[index].id}`, { status });
       setPromises((prevState) => {
         const updatedPromises = [...prevState];
         updatedPromises[index].status = status;
@@ -56,6 +58,7 @@ const App = () => {
 
   return (
     <div>
+      <a href="/.auth/login/aad">Login</a>
       <h1>My Promises</h1>
       <div>
         <input
@@ -74,8 +77,8 @@ const App = () => {
               <li key={index}>
                 {promise.text}
                 <div>
-                  <button onClick={() => handlePromiseStatusChange(index, 'kept')}>promise Kept</button>
-                  <button onClick={() => handlePromiseStatusChange(index, 'failed')}>promise Failed</button>
+                  <button onClick={() => handlePromiseStatusChange(index, 'kept')}>Promise Kept</button>
+                  <button onClick={() => handlePromiseStatusChange(index, 'failed')}>Promise Failed</button>
                 </div>
               </li>
             )
