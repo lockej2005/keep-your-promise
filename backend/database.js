@@ -1,62 +1,57 @@
+// database.js
+
 const sql = require('mssql');
 
-// Configuration object for your Azure SQL Server
 const config = {
-  user: 'your_username_here',
-  password: 'your_password_here',
-  server: 'promisestatserver.database.windows.net', 
+  user: 'lockej2005',
+  password: 'T0mat0P0tat0',
+  server: 'promisestatserver.database.windows.net',
   database: 'promisedb',
   options: {
-    encrypt: true
-  }
+    encrypt: true,
+  },
 };
 
-// Function to add a new promise to the database
-const addPromise = async (text, status, callback) => {
-  try {
-    const pool = await sql.connect(config);
-    const result = await pool.request()
-      .input('text', sql.NVarChar, text)
-      .input('status', sql.NVarChar, status)
-      .query('INSERT INTO promises (promise, status) VALUES (@text, @status)');
+const connectionPool = new sql.ConnectionPool(config).connect()
+  .then(pool => {
+    console.log('Connected to MSSQL')
+    return pool
+  })
+  .catch(err => console.log('Database Connection Failed! ', err));
 
-    console.log('Promise added successfully.');
-    callback(null);
+const addPromise = async (promise, status) => {
+  try {
+    const pool = await connectionPool;
+    const result = await pool.request()
+      .input('promise', sql.NVarChar, promise)
+      .input('status', sql.NVarChar, status)
+      .query('INSERT INTO promises (promise, status) VALUES (@promise, @status)');
+    return result.rowsAffected;
   } catch (err) {
-    console.error('Error adding promise:', err.message);
-    callback(err);
+    console.log('Error running the query!', err);
   }
 };
 
-// Function to update the status of a promise
-const updatePromiseStatus = async (id, status, callback) => {
+const updatePromiseStatus = async (id, status) => {
   try {
-    const pool = await sql.connect(config);
+    const pool = await connectionPool;
     const result = await pool.request()
-      .input('status', sql.NVarChar, status)
       .input('id', sql.Int, id)
+      .input('status', sql.NVarChar, status)
       .query('UPDATE promises SET status = @status WHERE id = @id');
-
-    console.log('Promise status updated successfully.');
-    callback(null);
+    return result.rowsAffected;
   } catch (err) {
-    console.error('Error updating promise status:', err.message);
-    callback(err);
+    console.log('Error running the query!', err);
   }
 };
 
-// Function to retrieve all promises from the database
-const getAllPromises = async (callback) => {
+const getAllPromises = async () => {
   try {
-    const pool = await sql.connect(config);
-    const result = await pool.request()
-      .query('SELECT * FROM promises');
-
-    console.log('Promises retrieved successfully.');
-    callback(null, result.recordset);
+    const pool = await connectionPool;
+    const result = await pool.request().query('SELECT * FROM promises');
+    return result.recordset;
   } catch (err) {
-    console.error('Error retrieving promises:', err.message);
-    callback(err, null);
+    console.log('Error running the query!', err);
   }
 };
 

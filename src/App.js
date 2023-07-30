@@ -1,19 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
-const BASE_URL = 'promisestatserver.database.windows.net';
-
 const App = () => {
   const [promises, setPromises] = useState([]);
   const [newPromise, setNewPromise] = useState('');
 
   useEffect(() => {
+    // Fetch promises from the API when the component mounts
     fetchPromises();
   }, []);
 
   const fetchPromises = async () => {
     try {
-      const response = await axios.get(`${BASE_URL}/api/get-promises`);
+      const response = await axios.get('http://localhost:5000/api/get-promises');
       setPromises(response.data);
     } catch (error) {
       console.error('Error fetching promises:', error.response.data.error);
@@ -23,7 +22,9 @@ const App = () => {
   const handleAddPromise = async () => {
     if (newPromise.trim() !== '') {
       try {
-        await axios.post(`${BASE_URL}/api/add-promise`, { text: newPromise });
+        // Send a POST request to the API endpoint to add the new promise
+        await axios.post('http://localhost:5000/api/add-promise', { promise: newPromise });
+        // If the request is successful, fetch updated promises from the API
         fetchPromises();
         setNewPromise('');
       } catch (error) {
@@ -34,10 +35,18 @@ const App = () => {
 
   const handlePromiseStatusChange = async (index, status) => {
     try {
-      await axios.put(`${BASE_URL}/api/update-promise/${promises[index].id}`, { status });
+      // Send a PUT request to the API endpoint to update the promise status
+      await axios.put(`http://localhost:5000/api/update-promise/${promises[index].id}`, { status });
+
+      // Update the promises state using the functional form of setPromises
       setPromises((prevState) => {
         const updatedPromises = [...prevState];
         updatedPromises[index].status = status;
+
+        // Update activePromises, promisesKept, and promisesFailed with the updated promise
+        // No need to update activePromises, promisesKept, and promisesFailed here
+        // as they are now part of the promises state
+
         return updatedPromises;
       });
     } catch (error) {
@@ -48,26 +57,30 @@ const App = () => {
   const calculatePromiseWeightScore = () => {
     const keptPromisesCount = promises.filter((promise) => promise.status === 'kept').length;
     const totalKeptOrFailedPromisesCount = keptPromisesCount + promises.filter((promise) => promise.status === 'failed').length;
+
     if (totalKeptOrFailedPromisesCount === 0) {
       return 0;
     }
+
     return ((keptPromisesCount / totalKeptOrFailedPromisesCount) * 100).toFixed(2);
   };
+
+  // No need to filter activePromises, promisesKept, and promisesFailed here
+  // as they are now part of the promises state
 
   const promiseWeightScore = calculatePromiseWeightScore();
 
   return (
     <div>
-      <a href="/.auth/login/aad">Login</a>
       <h1>My Promises</h1>
       <div>
         <input
-          type="text"
+          type="promise"
           value={newPromise}
           onChange={(e) => setNewPromise(e.target.value)}
           placeholder="Enter your promise..."
         />
-        <button onClick={handleAddPromise}>Add promise</button>
+        <button onClick={handleAddPromise}>Add Promise</button>
       </div>
       <div>
         <h2>Active Promises</h2>
@@ -75,7 +88,7 @@ const App = () => {
           {promises.map((promise, index) => (
             promise.status === 'active' && (
               <li key={index}>
-                {promise.text}
+                {promise.promise}
                 <div>
                   <button onClick={() => handlePromiseStatusChange(index, 'kept')}>Promise Kept</button>
                   <button onClick={() => handlePromiseStatusChange(index, 'failed')}>Promise Failed</button>
@@ -90,7 +103,7 @@ const App = () => {
         <ul>
           {promises.map((promise, index) => (
             promise.status === 'kept' && (
-              <li key={index}>{promise.text}</li>
+              <li key={index}>{promise.promise}</li>
             )
           ))}
         </ul>
@@ -100,7 +113,7 @@ const App = () => {
         <ul>
           {promises.map((promise, index) => (
             promise.status === 'failed' && (
-              <li key={index}>{promise.text}</li>
+              <li key={index}>{promise.promise}</li>
             )
           ))}
         </ul>
