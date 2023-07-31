@@ -1,25 +1,30 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import { Link } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 
 const Signup = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [email, setEmail] = useState('');
+  const history = useHistory();
 
   const handleSignup = async () => {
     try {
-      await axios.post('http://localhost:5000/api/signup', {
+      const response = await axios.post('http://localhost:5000/api/signup', {
         username,
         password,
         email
       });
-      // After successful signup, clear input fields
+
+      console.log(response);  // Log the whole response to see its structure
+
+      // After successful signup, clear input fields and navigate to dashboard
       setUsername('');
       setPassword('');
       setEmail('');
+      history.push('/dashboard');
     } catch (error) {
-      console.error('Error during signup:', error.response.data.error);
+      console.error('Error during signup:', error.response?.data?.error || error);
     }
   };
 
@@ -50,7 +55,7 @@ const Signup = () => {
           placeholder="Password"
         />
       </div>
-      <button onClick={handleSignup}><Link to="/dashboard">Sign Up</Link></button>
+      <button onClick={handleSignup}>Sign Up</button>
     </div>
   );
 };
