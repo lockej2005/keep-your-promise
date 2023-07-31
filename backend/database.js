@@ -1,5 +1,4 @@
 const sql = require('mssql');
-const bcrypt = require('bcrypt');
 
 const config = {
   user: 'lockej2005',
