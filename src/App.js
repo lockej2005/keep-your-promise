@@ -6,6 +6,7 @@ const App = () => {
   const [newPromise, setNewPromise] = useState('');
 
   useEffect(() => {
+    // Fetch promises from the API when the component mounts
     fetchPromises();
   }, []);
 
@@ -21,12 +22,9 @@ const App = () => {
   const handleAddPromise = async () => {
     if (newPromise.trim() !== '') {
       try {
-        await axios.post('http://localhost:5000/api/add-promise', {
-          promise: newPromise,
-          recusername: 'recuser', // Replace with actual value
-          senusername: 'senuser', // Replace with actual value
-          sentAt: new Date(),
-        });
+        // Send a POST request to the API endpoint to add the new promise
+        await axios.post('http://localhost:5000/api/add-promise', { promise: newPromise });
+        // If the request is successful, fetch updated promises from the API
         fetchPromises();
         setNewPromise('');
       } catch (error) {
@@ -37,8 +35,20 @@ const App = () => {
 
   const handlePromiseStatusChange = async (index, status) => {
     try {
+      // Send a PUT request to the API endpoint to update the promise status
       await axios.put(`http://localhost:5000/api/update-promise/${promises[index].id}`, { status });
-      fetchPromises();
+
+      // Update the promises state using the functional form of setPromises
+      setPromises((prevState) => {
+        const updatedPromises = [...prevState];
+        updatedPromises[index].status = status;
+
+        // Update activePromises, promisesKept, and promisesFailed with the updated promise
+        // No need to update activePromises, promisesKept, and promisesFailed here
+        // as they are now part of the promises state
+
+        return updatedPromises;
+      });
     } catch (error) {
       console.error('Error updating promise status:', error.response.data.error);
     }
@@ -55,47 +65,59 @@ const App = () => {
     return ((keptPromisesCount / totalKeptOrFailedPromisesCount) * 100).toFixed(2);
   };
 
-  const promiseWeightScore = calculatePromiseWeightScore();
+  // No need to filter activePromises, promisesKept, and promisesFailed here
+  // as they are now part of the promises state
 
-  const renderPromise = (promise, index, status) => (
-    <li key={index}>
-      {promise.promise} <br />
-      Sent by: {promise.senusername} <br />
-      Received by: {promise.recusername} <br />
-      Sent at: {new Date(promise.sentAt).toLocaleString()}
-      {status === 'active' && (
-        <div>
-          <button onClick={() => handlePromiseStatusChange(index, 'kept')}>Promise Kept</button>
-          <button onClick={() => handlePromiseStatusChange(index, 'failed')}>Promise Failed</button>
-        </div>
-      )}
-    </li>
-  );
+  const promiseWeightScore = calculatePromiseWeightScore();
 
   return (
     <div>
       <h1>My Promises</h1>
       <div>
         <input
-          type="text"
+          type="promise"
           value={newPromise}
           onChange={(e) => setNewPromise(e.target.value)}
           placeholder="Enter your promise..."
         />
         <button onClick={handleAddPromise}>Add Promise</button>
       </div>
-      <h2>Active Promises:</h2>
-      <ul>
-        {promises.map((promise, index) => promise.status === 'active' && renderPromise(promise, index, 'active'))}
-      </ul>
-      <h2>Kept Promises:</h2>
-      <ul>
-        {promises.map((promise, index) => promise.status === 'kept' && renderPromise(promise, index, 'kept'))}
-      </ul>
-      <h2>Failed Promises:</h2>
-      <ul>
-        {promises.map((promise, index) => promise.status === 'failed' && renderPromise(promise, index, 'failed'))}
-      </ul>
+      <div>
+        <h2>Active Promises</h2>
+        <ul>
+          {promises.map((promise, index) => (
+            promise.status === 'active' && (
+              <li key={index}>
+                {promise.promise}
+                <div>
+                  <button onClick={() => handlePromiseStatusChange(index, 'kept')}>Promise Kept</button>
+                  <button onClick={() => handlePromiseStatusChange(index, 'failed')}>Promise Failed</button>
+                </div>
+              </li>
+            )
+          ))}
+        </ul>
+      </div>
+      <div>
+        <h2>Promises Kept</h2>
+        <ul>
+          {promises.map((promise, index) => (
+            promise.status === 'kept' && (
+              <li key={index}>{promise.promise}</li>
+            )
+          ))}
+        </ul>
+      </div>
+      <div>
+        <h2>Promises Failed</h2>
+        <ul>
+          {promises.map((promise, index) => (
+            promise.status === 'failed' && (
+              <li key={index}>{promise.promise}</li>
+            )
+          ))}
+        </ul>
+      </div>
       <div>
         <h2>Promise Weight Score: {promiseWeightScore}%</h2>
       </div>

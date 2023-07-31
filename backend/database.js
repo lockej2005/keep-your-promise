@@ -1,3 +1,5 @@
+// database.js
+
 const sql = require('mssql');
 
 const config = {
@@ -17,16 +19,13 @@ const connectionPool = new sql.ConnectionPool(config).connect()
   })
   .catch(err => console.log('Database Connection Failed! ', err));
 
-const addPromise = async (promise, status, recusername, senusername, sentAt) => {
+const addPromise = async (promise, status) => {
   try {
     const pool = await connectionPool;
     const result = await pool.request()
       .input('promise', sql.NVarChar, promise)
       .input('status', sql.NVarChar, status)
-      .input('recusername', sql.NVarChar, recusername)
-      .input('senusername', sql.NVarChar, senusername)
-      .input('sentAt', sql.DateTime, new Date(sentAt))
-      .query('INSERT INTO promises (promise, status, recusername, senusername, sentAt) VALUES (@promise, @status, @recusername, @senusername, @sentAt)');
+      .query('INSERT INTO promises (promise, status) VALUES (@promise, @status)');
     return result.rowsAffected;
   } catch (err) {
     console.log('Error running the query!', err);
