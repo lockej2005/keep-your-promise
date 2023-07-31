@@ -4,7 +4,7 @@ import App from './App';
 
 test('renders signup header', () => {
   render(<App />);
-  const linkElement = screen.getByText(/Signup/i);
+  const linkElement = screen.getByText(/Login/i);
   expect(linkElement).toBeInTheDocument();
 });
 
