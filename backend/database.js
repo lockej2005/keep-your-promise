@@ -1,4 +1,5 @@
 const sql = require('mssql');
+const bcrypt = require('bcrypt');
 
 const config = {
   user: 'lockej2005',
@@ -9,6 +10,41 @@ const config = {
     encrypt: true,
   },
 };
+const getAllPromises = async (senusername) => {
+  try {
+    const pool = await connectionPool;
+    const result = await pool.request()
+      .input('senusername', sql.NVarChar, senusername)
+      .query('SELECT * FROM promises WHERE senusername = @senusername');
+    return result.recordset;
+  } catch (err) {
+    console.log('Error running the query!', err);
+  }
+};
+const getUser = async (username, password) => {
+  try {
+    const pool = await connectionPool;
+    const result = await pool.request()
+      .input('username', sql.NVarChar, username)
+      .query('SELECT * FROM users WHERE username = @username');
+    const user = result.recordset[0];
+
+    console.log("Fetched user:", user);  // Add this line to check the user fetched from the database
+
+    // Check if user exists and the password is correct
+    if (user && password === user.password) {
+      // Never return the password or other sensitive fields in the response
+      delete user.password;
+      return user;
+    } else {
+      return null;
+    }
+  } catch (err) {
+    console.log('Error running the query!', err);
+    return null;
+  }
+};
+
 
 const connectionPool = new sql.ConnectionPool(config).connect()
   .then(pool => {
@@ -60,19 +96,11 @@ const updatePromiseStatus = async (id, status) => {
   }
 };
 
-const getAllPromises = async () => {
-  try {
-    const pool = await connectionPool;
-    const result = await pool.request().query('SELECT * FROM promises');
-    return result.recordset;
-  } catch (err) {
-    console.log('Error running the query!', err);
-  }
-};
 
 module.exports = {
   addPromise,
   updatePromiseStatus,
   getAllPromises,
   addUser,
+  getUser, // don't forget to export it
 };

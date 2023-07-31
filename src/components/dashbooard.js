@@ -4,8 +4,6 @@ import axios from 'axios';
 const Dashboard = () => {
   const [promises, setPromises] = useState([]);
   const [newPromise, setNewPromise] = useState('');
-  const [recUsername, setRecUsername] = useState('');  // New state for receiver username
-  const currentUser = localStorage.getItem('username');  // Fetch username from local storage
 
   useEffect(() => {
     fetchPromises();
@@ -13,10 +11,7 @@ const Dashboard = () => {
 
   const fetchPromises = async () => {
     try {
-      const config = {
-        withCredentials: true  // This will include cookies in requests
-      };
-      const response = await axios.get('http://localhost:5000/api/get-promises', config);
+      const response = await axios.get('http://localhost:5000/api/get-promises');
       setPromises(response.data);
     } catch (error) {
       console.error('Error fetching promises:', error.response.data.error);
@@ -24,17 +19,16 @@ const Dashboard = () => {
   };
 
   const handleAddPromise = async () => {
-    if (newPromise.trim() !== '' && recUsername.trim() !== '') {
+    if (newPromise.trim() !== '') {
       try {
         await axios.post('http://localhost:5000/api/add-promise', {
           promise: newPromise,
-          recusername: recUsername, // Use receiver username from state
-          senusername: currentUser, // Use the username from local storage
+          recusername: 'recuser', // Replace with actual value
+          senusername: 'senuser', // Replace with actual value
           sentAt: new Date(),
         });
         fetchPromises();
         setNewPromise('');
-        setRecUsername('');  // Clear the input field
       } catch (error) {
         console.error('Error adding promise:', error.response.data.error);
       }
@@ -88,21 +82,11 @@ const Dashboard = () => {
           onChange={(e) => setNewPromise(e.target.value)}
           placeholder="Enter your promise..."
         />
-        <input
-          type="text"
-          value={recUsername}
-          onChange={(e) => setRecUsername(e.target.value)}
-          placeholder="Enter receiver username..."
-        />
         <button onClick={handleAddPromise}>Add Promise</button>
       </div>
       <h2>Active Promises:</h2>
       <ul>
         {promises.map((promise, index) => promise.status === 'active' && renderPromise(promise, index, 'active'))}
-      </ul>
-      <h2>Recieved Promises:</h2>
-      <ul>
-        {promises.map((promise, index) => promise.recusername === currentUser && (promise.status === 'kept' || promise.status === 'failed') && renderPromise(promise, index, promise.status))}
       </ul>
       <h2>Kept Promises:</h2>
       <ul>
