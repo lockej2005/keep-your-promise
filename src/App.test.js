@@ -2,8 +2,9 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import App from './App';
 
-test('renders My Promises header', () => {
+test('renders signup header', () => {
   render(<App />);
-  const linkElement = screen.getByText(/My Promises/i);
+  const linkElement = screen.getByText(/Signup/i);
   expect(linkElement).toBeInTheDocument();
 });
+
