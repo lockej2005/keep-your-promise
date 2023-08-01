@@ -10,7 +10,7 @@ const Login = () => {
 
   const handleLogin = async () => {
     try {
-      const response = await axios.post('/api/login', {
+      const response = await axios.post('https://promisestatbackend.azurewebsites.net/api/login', {
         username,
         password
       }, { withCredentials: true });
