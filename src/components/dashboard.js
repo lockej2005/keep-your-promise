@@ -16,7 +16,7 @@ const Dashboard = () => {
       const config = {
         withCredentials: true  // This will include cookies in requests
       };
-      const response = await axios.get('http://localhost:5000/api/get-promises', config);
+      const response = await axios.get('https://promisestatbackend.azurewebsites.net/api/get-promises', config);
       setPromises(response.data);
     } catch (error) {
       console.error('Error fetching promises:', error.response.data.error);
@@ -26,7 +26,7 @@ const Dashboard = () => {
   const handleAddPromise = async () => {
     if (newPromise.trim() !== '' && recUsername.trim() !== '') {
       try {
-        await axios.post('http://localhost:5000/api/add-promise', {
+        await axios.post('https://promisestatbackend.azurewebsites.net/api/add-promise', {
           promise: newPromise,
           recusername: recUsername, // Use receiver username from state
           senusername: currentUser, // Use the username from local storage
@@ -43,7 +43,7 @@ const Dashboard = () => {
 
   const handlePromiseStatusChange = async (index, status) => {
     try {
-      await axios.put(`http://localhost:5000/api/update-promise/${promises[index].id}`, { status });
+      await axios.put(`https://promisestatbackend.azurewebsites.net/api/update-promise/${promises[index].id}`, { status });
       fetchPromises();
     } catch (error) {
       console.error('Error updating promise status:', error.response.data.error);

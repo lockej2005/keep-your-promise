@@ -24,7 +24,7 @@
     "web-vitals": "^2.1.4"
   },
   "scripts": {
-  "start": "concurrently \"react-scripts start\" \"node backend/server.js\"",
+  "start": "react-scripts start",
     "build": "concurrently \"react-scripts build\" \"node backend/server.js\"",
     "test": "react-scripts test --transformIgnorePatterns '/node_modules/(?!(axios))/'",
     "eject": "react-scripts eject"
